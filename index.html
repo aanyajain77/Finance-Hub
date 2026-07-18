@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSME Financial Health Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="light-theme">
+    <a href="#mainContent" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
+    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">
+      <div class="w-full max-w-md rounded-3xl border border-white/20 bg-white/90 p-8 shadow-2xl backdrop-blur dark:bg-slate-900/90">
+        <div class="mb-6 text-center">
+          <div class="mb-3 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-600">📊</div>
+          <h1 class="text-2xl font-semibold text-slate-900 dark:text-white">MSME Finance Hub</h1>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Monitor cash flow, profit, and risks in one place.</p>
+        </div>
+        <div class="mb-4 flex rounded-2xl bg-slate-100 p-1">
+          <button id="showSigninBtn" type="button" class="auth-tab flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white">Sign In</button>
+          <button id="showSignupBtn" type="button" class="auth-tab flex-1 rounded-xl px-3 py-2 text-sm font-medium text-slate-600">Sign Up</button>
+        </div>
+        <form id="signinForm" class="space-y-4">
+          <input id="signinEmail" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Email" value="asha@coastalcrafts.in" />
+          <input id="signinPassword" type="password" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Password" value="demo123" />
+          <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700">Sign In</button>
+        </form>
+        <form id="signupForm" class="hidden space-y-4">
+          <input id="signupName" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Full Name" />
+          <input id="signupEmail" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Email" />
+          <input id="signupPassword" type="password" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Password" />
+          <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700">Create Account</button>
+        </form>
+        <p id="authMessage" class="mt-3 text-center text-sm text-emerald-700"></p>
+      </div>
+    </div>
+
+    <div id="appShell" class="hidden min-h-screen bg-slate-50 text-slate-800 transition dark:bg-slate-950 dark:text-slate-100">
+      <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-slate-200 bg-white/80 p-6 backdrop-blur transition-transform duration-200 dark:border-slate-800 dark:bg-slate-900/80 lg:translate-x-0">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600">MSME</p>
+            <h2 class="text-xl font-semibold">Finance Hub</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="themeToggle" class="rounded-full border border-slate-200 p-2 text-slate-600 dark:border-slate-700 dark:text-slate-200" aria-label="Toggle theme">🌗</button>
+            <button id="menuToggle" class="rounded-full border border-slate-200 p-2 text-slate-600 lg:hidden dark:border-slate-700 dark:text-slate-200" aria-label="Toggle navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
+          </div>
+        </div>
+
+        <nav class="mt-8 space-y-2">
+          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="dashboard">📊 Dashboard</button>
+          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="tracker">💰 Tracker</button>
+          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="analytics">📈 Analytics</button>
+          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="health">🎯 Health Score</button>
+          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="reports">📑 Reports</button>
+          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="settings">⚙️ Settings</button>
+        </nav>
+
+        <div class="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/40">
+          <p class="font-semibold">Goal tracker</p>
+          <p class="mt-2">Save ₹50,000 this month</p>
+          <div class="mt-3 h-2 rounded-full bg-emerald-200">
+            <div id="goalProgress" class="h-2 rounded-full bg-emerald-600" style="width: 68%"></div>
+          </div>
+          <p id="goalText" class="mt-2 text-xs">₹34,000 saved</p>
+        </div>
+      </aside>
+
+      <main id="mainContent" class="ml-0 p-6 lg:ml-72 lg:p-8">
+        <header class="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Welcome back</p>
+            <h1 id="userName" class="text-2xl font-semibold">Asha Sharma</h1>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="logoutBtn" class="rounded-2xl border border-rose-200 px-4 py-2 text-sm font-medium text-rose-700">↪ Log Out</button>
+            <button id="voiceToggle" class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 dark:border-slate-700 dark:text-slate-200">🎤 Voice Commands</button>
+            <button id="assistantToggle" class="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white">🤖 Ask Finance Assistant</button>
+          </div>
+        </header>
+
+        <section id="dashboard" class="section">
+          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <p class="text-sm text-slate-500 dark:text-slate-400">Revenue</p>
+              <p id="revenueValue" class="mt-3 text-2xl font-semibold">₹0</p>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <p class="text-sm text-slate-500 dark:text-slate-400">Expenses</p>
+              <p id="expenseValue" class="mt-3 text-2xl font-semibold">₹0</p>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <p class="text-sm text-slate-500 dark:text-slate-400">Profit</p>
+              <p id="profitValue" class="mt-3 text-2xl font-semibold text-emerald-600">₹0</p>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <p class="text-sm text-slate-500 dark:text-slate-400">Cash Flow</p>
+              <p id="cashValue" class="mt-3 text-2xl font-semibold text-amber-600">₹0</p>
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-6 xl:grid-cols-[2.1fr_1fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-semibold">Monthly Trend</h2>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">Revenue vs expenses</p>
+                </div>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">Updated</span>
+              </div>
+              <canvas id="monthlyChart"></canvas>
+            </div>
+            <div class="space-y-4">
+              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <h3 class="text-lg font-semibold">Alerts</h3>
+                <ul id="alertsList" class="mt-3 space-y-2 text-sm"></ul>
+              </div>
+              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <h3 class="text-lg font-semibold">AI Recommendations</h3>
+                <ul id="recommendationsList" class="mt-3 space-y-2 text-sm"></ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tracker" class="section hidden">
+          <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Add Income / Expense</h2>
+              <form id="transactionForm" class="mt-4 space-y-3">
+                <label for="type" class="sr-only">Transaction type</label>
+                <select id="type" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800">
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                </select>
+                <label for="category" class="sr-only">Category</label>
+                <input id="category" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Category" />
+                <label for="amount" class="sr-only">Amount</label>
+                <input id="amount" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Amount" />
+                <label for="description" class="sr-only">Description</label>
+                <input id="description" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Description" />
+                <label for="date" class="sr-only">Date</label>
+                <input id="date" type="date" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" />
+                <button class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white">Save entry</button>
+              </form>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-lg font-semibold">Recent Transactions</h2>
+                <span class="text-sm text-slate-500 dark:text-slate-400">Local storage</span>
+              </div>
+              <div id="transactionsList" class="space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="analytics" class="section hidden">
+          <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Cash Flow Analytics</h2>
+              <canvas id="flowChart" class="mt-4"></canvas>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Expense Categories</h2>
+              <canvas id="categoryChart" class="mt-4"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section id="health" class="section hidden">
+          <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="mx-auto flex h-44 w-44 items-center justify-center rounded-full bg-[conic-gradient(#10b981_0%_82%,#e5e7eb_82%_100%)]">
+                <div class="flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white text-center shadow-inner dark:bg-slate-900">
+                  <p class="text-sm text-slate-500">Score</p>
+                  <p id="scoreValue" class="text-4xl font-semibold text-emerald-600">82</p>
+                </div>
+              </div>
+              <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">Healthy growth with controlled expenditure.</p>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Health Factors</h2>
+              <div id="healthFactors" class="mt-4 space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="reports" class="section hidden">
+          <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Financial Reports</h2>
+              <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Export current data as PDF or Excel for stakeholders.</p>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <button id="pdfExport" class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-medium text-white dark:bg-slate-700">Export PDF</button>
+                <button id="excelExport" class="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white">Export Excel</button>
+              </div>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Recent Snapshot</h2>
+              <div id="reportSummary" class="mt-4 space-y-3 text-sm"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="settings" class="section hidden">
+          <div class="grid gap-6 xl:grid-cols-[1fr_1fr]">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 class="text-lg font-semibold">Preferences</h2>
+              <div class="mt-4 space-y-3">
+                <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
+                  <span>Enable notifications</span>
+                  <input id="notifToggle" type="checkbox" class="h-5 w-5 rounded border-slate-300" />
+                </label>
+                <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
+                  <span>Voice assistant</span>
+                  <input id="voiceAssistToggle" type="checkbox" class="h-5 w-5 rounded border-slate-300" />
+                </label>
+                <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
+                  <span>GST reminder</span>
+                  <input id="gstToggle" type="checkbox" class="h-5 w-5 rounded border-slate-300" />
+                </label>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <h2 class="text-lg font-semibold">Goal Planner</h2>
+                <div class="mt-4 space-y-3">
+                  <input id="goalInput" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" value="50000" />
+                  <button id="saveGoalBtn" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white">Save goal</button>
+                  <div id="goalStatus" class="rounded-2xl border border-dashed border-emerald-200 p-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:text-emerald-400"></div>
+                </div>
+              </div>
+              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <h2 class="text-lg font-semibold">Budget Planner</h2>
+                <form id="budgetForm" class="mt-4 space-y-3">
+                  <input id="budgetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Monthly Budget" />
+                  <input id="profitTargetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Target Profit" />
+                  <input id="savingsTargetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Savings Goal" />
+                  <button class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white">Save plan</button>
+                </form>
+                <div id="budgetPlanSummary" class="mt-4 rounded-2xl border border-dashed border-emerald-200 p-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:text-emerald-400"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="border-t border-slate-200 bg-white/80 px-6 py-6 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300">
+      <p class="font-semibold text-slate-800 dark:text-slate-100">Problem Statement:- Fin-04</p>
+      <p class="mt-2">Small businesses often struggle to understand their financial health because critical data is scattered across accounts, invoices, expenses, taxes, and records.<br> This platform brings it together into one clear decision-making dashboard.</p>
+      <p class="mt-4"><span class="font-semibold">Team Name:</span> Semicolon;)</p>
+      <p><span class="font-semibold">Team Members:</span> Aanya Jain (Team Lead) and Paridhi Gupta</p>
+    </footer>
+
+    <div id="assistantPanel" class="fixed bottom-5 right-5 z-50 hidden w-80 rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      <div class="mb-3 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-semibold">Finance Assistant</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">AI suggestions</p>
+        </div>
+        <button id="closeAssistant" class="text-sm text-slate-500">✕</button>
+      </div>
+      <div id="chatMessages" class="space-y-2 text-sm"></div>
+      <div class="mt-3 flex gap-2">
+        <input id="chatInput" class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Ask about cash flow" />
+        <button id="sendChat" class="rounded-2xl bg-emerald-600 px-3 py-2 text-white">Send</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
