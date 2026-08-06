@@ -1,246 +1,688 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MSME Financial Health Platform</title>
+    <meta name="theme-color" content="#10b981" />
+    <meta name="description" content="MSME Financial Health Platform - Track cash flow, profit, GST liability, invoices & risk in one place." />
+    <title>MSME Financial Health Platform | Fin-04 Hub</title>
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#ecfdf5',
+                100: '#d1fae5',
+                500: '#10b981',
+                600: '#059669',
+                700: '#047857',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Custom Styles & Google Fonts -->
     <link rel="stylesheet" href="styles.css" />
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
   </head>
-  <body class="light-theme">
-    <a href="#mainContent" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
-    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4">
-      <div class="w-full max-w-md rounded-3xl border border-white/20 bg-white/90 p-8 shadow-2xl backdrop-blur dark:bg-slate-900/90">
+  <body class="bg-slate-50 text-slate-800 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased">
+    
+    <!-- Mobile Navigation Drawer Backdrop -->
+    <div id="sidebarBackdrop" class="fixed inset-0 z-30 hidden bg-slate-900/50 backdrop-blur-sm transition-opacity lg:hidden"></div>
+
+    <!-- Splash / Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 text-white transition-opacity duration-500">
+      <div class="relative flex items-center justify-center">
+        <div class="h-24 w-24 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent shadow-lg shadow-emerald-500/20"></div>
+        <span class="absolute text-3xl">📊</span>
+      </div>
+      <h2 class="mt-6 text-2xl font-extrabold tracking-wide font-heading">MSME Finance Hub</h2>
+      <p class="mt-1 text-sm text-slate-400">Consolidating your cash flow, profit, and risk parameters...</p>
+    </div>
+
+    <a href="#mainContent" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-xl focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-white focus:outline-none">Skip to content</a>
+
+    <!-- Auth Overlay Modal -->
+    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 backdrop-blur-md transition-all duration-300">
+      <div class="w-full max-w-md rounded-3xl border border-white/20 bg-white/95 p-8 shadow-2xl backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/95">
         <div class="mb-6 text-center">
-          <div class="mb-3 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-600">📊</div>
-          <h1 class="text-2xl font-semibold text-slate-900 dark:text-white">MSME Finance Hub</h1>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Monitor cash flow, profit, and risks in one place.</p>
+          <div class="mb-3 inline-flex rounded-2xl bg-emerald-100 p-4 text-3xl text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 shadow-md shadow-emerald-500/10">📊</div>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white font-heading">MSME Finance Hub</h1>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Monitor cash flow, GST, profit, and risks in one unified dashboard.</p>
         </div>
-        <div class="mb-4 flex rounded-2xl bg-slate-100 p-1">
-          <button id="showSigninBtn" type="button" class="auth-tab flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white">Sign In</button>
-          <button id="showSignupBtn" type="button" class="auth-tab flex-1 rounded-xl px-3 py-2 text-sm font-medium text-slate-600">Sign Up</button>
+
+        <!-- Auth Mode Toggle -->
+        <div class="mb-6 flex rounded-2xl bg-slate-100 p-1 dark:bg-slate-800">
+          <button id="showSigninBtn" type="button" class="auth-tab flex-1 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition-all shadow-sm">Sign In</button>
+          <button id="showSignupBtn" type="button" class="auth-tab flex-1 rounded-xl py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 transition-all">Sign Up</button>
         </div>
+
+        <!-- Sign In Form -->
         <form id="signinForm" class="space-y-4">
-          <input id="signinEmail" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Email" value="asha@coastalcrafts.in" />
-          <input id="signinPassword" type="password" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Password" value="demo123" />
-          <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700">Sign In</button>
+          <div>
+            <label for="signinEmail" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email</label>
+            <input id="signinEmail" type="email" required class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:border-emerald-500" placeholder="asha@coastalcrafts.in" value="asha@coastalcrafts.in" />
+          </div>
+          <div>
+            <label for="signinPassword" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
+            <input id="signinPassword" type="password" required class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:border-emerald-500" placeholder="••••••••" value="demo123" />
+          </div>
+          <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white transition-all hover:bg-emerald-700 active:scale-[0.99] shadow-lg shadow-emerald-600/25">Sign In to Dashboard</button>
         </form>
+
+        <!-- Sign Up Form -->
         <form id="signupForm" class="hidden space-y-4">
-          <input id="signupName" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Full Name" />
-          <input id="signupEmail" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Email" />
-          <input id="signupPassword" type="password" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none" placeholder="Password" />
-          <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700">Create Account</button>
+          <div>
+            <label for="signupName" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
+            <input id="signupName" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:border-emerald-500" placeholder="Asha Sharma" />
+          </div>
+          <div>
+            <label for="signupEmail" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email</label>
+            <input id="signupEmail" type="email" class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:border-emerald-500" placeholder="name@company.com" />
+          </div>
+          <div>
+            <label for="signupPassword" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
+            <input id="signupPassword" type="password" class="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:focus:border-emerald-500" placeholder="Create a password" />
+          </div>
+          <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white transition-all hover:bg-emerald-700 active:scale-[0.99] shadow-lg shadow-emerald-600/25">Create Account</button>
         </form>
-        <p id="authMessage" class="mt-3 text-center text-sm text-emerald-700"></p>
+
+        <p id="authMessage" class="mt-4 text-center text-xs font-medium text-emerald-600 min-h-[1rem]"></p>
       </div>
     </div>
 
-    <div id="appShell" class="hidden min-h-screen bg-slate-50 text-slate-800 transition dark:bg-slate-950 dark:text-slate-100">
-      <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-slate-200 bg-white/80 p-6 backdrop-blur transition-transform duration-200 dark:border-slate-800 dark:bg-slate-900/80 lg:translate-x-0">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600">MSME</p>
-            <h2 class="text-xl font-semibold">Finance Hub</h2>
+    <!-- Main Shell App -->
+    <div id="appShell" class="hidden min-h-screen">
+      <!-- Sidebar Navigation -->
+      <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col justify-between -translate-x-full border-r border-slate-200/80 bg-white/90 p-6 backdrop-blur-xl transition-transform duration-300 dark:border-slate-800/80 dark:bg-slate-900/95 lg:translate-x-0">
+        <div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400 font-heading">MSME</p>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white font-heading">Finance Hub</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="themeToggle" class="rounded-xl border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Toggle theme">🌗</button>
+              <button id="menuCloseBtn" class="rounded-xl border border-slate-200 p-2 text-slate-600 lg:hidden dark:border-slate-700 dark:text-slate-300" aria-label="Close navigation">✕</button>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="themeToggle" class="rounded-full border border-slate-200 p-2 text-slate-600 dark:border-slate-700 dark:text-slate-200" aria-label="Toggle theme">🌗</button>
-            <button id="menuToggle" class="rounded-full border border-slate-200 p-2 text-slate-600 lg:hidden dark:border-slate-700 dark:text-slate-200" aria-label="Toggle navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
-          </div>
+
+          <!-- Navigation Links -->
+          <nav class="mt-6 space-y-1 overflow-y-auto max-h-[calc(100vh-230px)] pr-1">
+            <button class="nav-link active flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-slate-800" data-section="dashboard">
+              <span>📊</span> Dashboard
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="tracker">
+              <span>💰</span> Tracker
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="analytics">
+              <span>📈</span> Analytics
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="health">
+              <span>🎯</span> Health Score
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="invoices">
+              <span>🧾</span> Invoices & Bills
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="khata">
+              <span>📒</span> Khata Ledger
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="gst">
+              <span>🧮</span> GST Estimator
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="reports">
+              <span>📑</span> Reports
+            </button>
+            <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-emerald-400" data-section="settings">
+              <span>⚙️</span> Settings
+            </button>
+          </nav>
         </div>
 
-        <nav class="mt-8 space-y-2">
-          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="dashboard">📊 Dashboard</button>
-          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="tracker">💰 Tracker</button>
-          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="analytics">📈 Analytics</button>
-          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="health">🎯 Health Score</button>
-          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="reports">📑 Reports</button>
-          <button class="nav-link flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800" data-section="settings">⚙️ Settings</button>
-        </nav>
-
-        <div class="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/40">
-          <p class="font-semibold">Goal tracker</p>
-          <p class="mt-2">Save ₹50,000 this month</p>
-          <div class="mt-3 h-2 rounded-full bg-emerald-200">
-            <div id="goalProgress" class="h-2 rounded-full bg-emerald-600" style="width: 68%"></div>
+        <!-- Sidebar Widget: Goal Tracker -->
+        <div class="rounded-3xl border border-emerald-200/60 bg-emerald-50/70 p-4 text-sm text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300 shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="font-semibold">Goal Progress</p>
+            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Monthly</span>
           </div>
-          <p id="goalText" class="mt-2 text-xs">₹34,000 saved</p>
+          <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">Savings Target</p>
+          <div class="mt-3 h-2.5 w-full rounded-full bg-emerald-200 dark:bg-emerald-900/60 overflow-hidden">
+            <div id="sidebarGoalBar" class="h-full rounded-full bg-emerald-600 transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="mt-2 flex justify-between text-xs font-medium">
+            <span id="sidebarGoalText">₹0</span>
+            <span id="sidebarGoalTarget">/ ₹50,000</span>
+          </div>
         </div>
       </aside>
 
-      <main id="mainContent" class="ml-0 p-6 lg:ml-72 lg:p-8">
-        <header class="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Welcome back</p>
-            <h1 id="userName" class="text-2xl font-semibold">Aanya Jain</h1>
+      <!-- Main Content Container -->
+      <main id="mainContent" class="ml-0 p-4 transition-all duration-300 lg:ml-72 lg:p-8">
+        <!-- Header -->
+        <header class="mb-6 flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/80 md:flex-row md:items-center md:justify-between">
+          <div class="flex items-center gap-3">
+            <button id="menuToggle" class="rounded-2xl border border-slate-200 p-2.5 text-slate-600 lg:hidden dark:border-slate-700 dark:text-slate-300" aria-label="Toggle navigation">☰</button>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Welcome back</p>
+              <h1 id="userName" class="text-2xl font-bold text-slate-900 dark:text-white font-heading">Asha Sharma</h1>
+            </div>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <button id="logoutBtn" class="rounded-2xl border border-rose-200 px-4 py-2 text-sm font-medium text-rose-700">↪ Log Out</button>
-            <button id="voiceToggle" class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 dark:border-slate-700 dark:text-slate-200">🎤 Voice Commands</button>
-            <button id="assistantToggle" class="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white">🤖 Ask Finance Assistant</button>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="quickAddBtn" class="flex items-center gap-1.5 rounded-2xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60">
+              <span>➕</span> Quick Entry
+            </button>
+            <button id="voiceToggle" class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700/80">
+              <span id="voiceIcon">🎤</span> Voice
+            </button>
+            <button id="assistantToggle" class="flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-95">
+              <span>🤖</span> AI Assistant
+            </button>
+            <button id="logoutBtn" class="flex items-center gap-1 rounded-2xl border border-rose-200 bg-rose-50/50 px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/30 dark:bg-rose-950/30 dark:text-rose-400">
+              ↪ Logout
+            </button>
           </div>
         </header>
 
-        <section id="dashboard" class="section">
-          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <p class="text-sm text-slate-500 dark:text-slate-400">Revenue</p>
-              <p id="revenueValue" class="mt-3 text-2xl font-semibold">₹0</p>
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section space-y-6">
+          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="glass-card glass-card-hover rounded-3xl p-6 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Revenue</span>
+                <span class="rounded-2xl bg-emerald-100 p-2.5 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">📈</span>
+              </div>
+              <p id="revenueValue" class="mt-4 text-3xl font-extrabold text-slate-900 dark:text-white font-heading">₹0</p>
+              <div class="mt-2 flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                <span>↑ Total Inflow</span>
+                <span class="rounded-full bg-emerald-50 px-2 py-0.5 dark:bg-emerald-950/60">Live</span>
+              </div>
             </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <p class="text-sm text-slate-500 dark:text-slate-400">Expenses</p>
-              <p id="expenseValue" class="mt-3 text-2xl font-semibold">₹0</p>
+
+            <div class="glass-card glass-card-hover rounded-3xl p-6 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Expenses</span>
+                <span class="rounded-2xl bg-rose-100 p-2.5 text-rose-600 dark:bg-rose-950 dark:text-rose-400">📉</span>
+              </div>
+              <p id="expenseValue" class="mt-4 text-3xl font-extrabold text-slate-900 dark:text-white font-heading">₹0</p>
+              <div class="mt-2 flex items-center gap-2 text-xs text-rose-500 font-semibold">
+                <span>↓ Total Outflow</span>
+                <span class="rounded-full bg-rose-50 px-2 py-0.5 dark:bg-rose-950/60">Tracked</span>
+              </div>
             </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <p class="text-sm text-slate-500 dark:text-slate-400">Profit</p>
-              <p id="profitValue" class="mt-3 text-2xl font-semibold text-emerald-600">₹0</p>
+
+            <div class="glass-card glass-card-hover rounded-3xl p-6 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Net Profit</span>
+                <span class="rounded-2xl bg-blue-100 p-2.5 text-blue-600 dark:bg-blue-950 dark:text-blue-400">⚖️</span>
+              </div>
+              <p id="profitValue" class="mt-4 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-heading">₹0</p>
+              <p class="mt-2 text-xs text-slate-500">Revenue - Expenses</p>
             </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <p class="text-sm text-slate-500 dark:text-slate-400">Cash Flow</p>
-              <p id="cashValue" class="mt-3 text-2xl font-semibold text-amber-600">₹0</p>
+
+            <div class="glass-card glass-card-hover rounded-3xl p-6 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Cash Flow Reserve</span>
+                <span class="rounded-2xl bg-amber-100 p-2.5 text-amber-600 dark:bg-amber-950 dark:text-amber-400">💧</span>
+              </div>
+              <p id="cashValue" class="mt-4 text-3xl font-extrabold text-amber-600 dark:text-amber-400 font-heading">₹0</p>
+              <p id="runwayValue" class="mt-2 text-xs text-slate-500">Estimated Liquidity Buffer</p>
             </div>
           </div>
 
-          <div class="mt-6 grid gap-6 xl:grid-cols-[2.1fr_1fr]">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div class="grid gap-6 xl:grid-cols-[2fr_1fr]">
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
               <div class="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 class="text-lg font-semibold">Monthly Trend</h2>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">Revenue vs expenses</p>
+                  <h2 class="text-lg font-bold font-heading">Monthly Financial Performance</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Real-time revenue, expense & profit tracking</p>
                 </div>
-                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">Updated</span>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Dynamic</span>
               </div>
-              <canvas id="monthlyChart"></canvas>
+              <div class="relative h-[280px] w-full">
+                <canvas id="monthlyChart"></canvas>
+              </div>
             </div>
-            <div class="space-y-4">
-              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h3 class="text-lg font-semibold">Alerts</h3>
-                <ul id="alertsList" class="mt-3 space-y-2 text-sm"></ul>
+
+            <div class="space-y-6">
+              <div class="glass-card rounded-3xl p-6 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white font-heading">🔔 Alerts & Notifications</h3>
+                <ul id="alertsList" class="mt-4 space-y-2.5 text-sm"></ul>
               </div>
-              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h3 class="text-lg font-semibold">AI Recommendations</h3>
-                <ul id="recommendationsList" class="mt-3 space-y-2 text-sm"></ul>
+              <div class="glass-card rounded-3xl p-6 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white font-heading">💡 AI Business Insights</h3>
+                <ul id="recommendationsList" class="mt-4 space-y-2.5 text-sm"></ul>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="tracker" class="section hidden">
-          <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Add Income / Expense</h2>
-              <form id="transactionForm" class="mt-4 space-y-3">
-                <label for="type" class="sr-only">Transaction type</label>
-                <select id="type" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800">
-                  <option value="income">Income</option>
-                  <option value="expense">Expense</option>
-                </select>
-                <label for="category" class="sr-only">Category</label>
-                <input id="category" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Category" />
-                <label for="amount" class="sr-only">Amount</label>
-                <input id="amount" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Amount" />
-                <label for="description" class="sr-only">Description</label>
-                <input id="description" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Description" />
-                <label for="date" class="sr-only">Date</label>
-                <input id="date" type="date" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" />
-                <button class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white">Save entry</button>
+        <!-- Transaction Tracker Section -->
+        <section id="tracker" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-[1fr_1.5fr]">
+            <!-- Add / Edit Form -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 id="formTitle" class="text-lg font-bold font-heading">Add Transaction</h2>
+              <p class="text-xs text-slate-500 mb-4">Record income or business expenditure</p>
+              
+              <form id="transactionForm" class="space-y-4">
+                <div>
+                  <label for="type" class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Type</label>
+                  <select id="type" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800">
+                    <option value="income">Income (+)</option>
+                    <option value="expense">Expense (-)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="category" class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Category</label>
+                  <input id="category" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. Sales, Marketing, Rent, Payroll" />
+                </div>
+                <div>
+                  <label for="amount" class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Amount (₹)</label>
+                  <input id="amount" type="number" required min="1" step="any" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="0.00" />
+                </div>
+                <div>
+                  <label for="description" class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Description</label>
+                  <input id="description" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. Client Invoice #102" />
+                </div>
+                <div>
+                  <label for="date" class="block text-xs font-medium uppercase tracking-wider text-slate-500 mb-1">Date</label>
+                  <input id="date" type="date" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                </div>
+                
+                <div class="flex gap-2 pt-2">
+                  <button id="saveTransactionBtn" type="submit" class="flex-1 rounded-2xl bg-emerald-600 px-4 py-3 font-semibold text-white transition hover:bg-emerald-700 shadow-md shadow-emerald-600/20">Save Entry</button>
+                  <button id="cancelEditBtn" type="button" class="hidden rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300">Cancel</button>
+                </div>
               </form>
             </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-lg font-semibold">Recent Transactions</h2>
-                <span class="text-sm text-slate-500 dark:text-slate-400">Local storage</span>
-              </div>
-              <div id="transactionsList" class="space-y-3"></div>
-            </div>
-          </div>
-        </section>
 
-        <section id="analytics" class="section hidden">
-          <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Cash Flow Analytics</h2>
-              <canvas id="flowChart" class="mt-4"></canvas>
-            </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Expense Categories</h2>
-              <canvas id="categoryChart" class="mt-4"></canvas>
-            </div>
-          </div>
-        </section>
-
-        <section id="health" class="section hidden">
-          <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div class="mx-auto flex h-44 w-44 items-center justify-center rounded-full bg-[conic-gradient(#10b981_0%_82%,#e5e7eb_82%_100%)]">
-                <div class="flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white text-center shadow-inner dark:bg-slate-900">
-                  <p class="text-sm text-slate-500">Score</p>
-                  <p id="scoreValue" class="text-4xl font-semibold text-emerald-600">82</p>
+            <!-- Transactions Table / List -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-lg font-bold font-heading">Transaction Ledger</h2>
+                  <p class="text-xs text-slate-500">Live search & filter entries</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800 text-xs font-medium">
+                    <button id="filterAll" class="tx-filter-btn rounded-lg px-2.5 py-1 bg-white text-emerald-700 dark:bg-slate-700 dark:text-emerald-400 font-bold">All</button>
+                    <button id="filterIncome" class="tx-filter-btn rounded-lg px-2.5 py-1 text-slate-600 dark:text-slate-300">Income</button>
+                    <button id="filterExpense" class="tx-filter-btn rounded-lg px-2.5 py-1 text-slate-600 dark:text-slate-300">Expenses</button>
+                  </div>
+                  <input id="searchTransactions" class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="Search entries..." />
                 </div>
               </div>
-              <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">Healthy growth with controlled expenditure.</p>
-            </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Health Factors</h2>
-              <div id="healthFactors" class="mt-4 space-y-3"></div>
+
+              <div id="transactionsList" class="space-y-3 max-h-[460px] overflow-y-auto pr-1"></div>
             </div>
           </div>
         </section>
 
-        <section id="reports" class="section hidden">
-          <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Financial Reports</h2>
-              <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Export current data as PDF or Excel for stakeholders.</p>
-              <div class="mt-6 flex flex-wrap gap-3">
-                <button id="pdfExport" class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-medium text-white dark:bg-slate-700">Export PDF</button>
-                <button id="excelExport" class="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white">Export Excel</button>
+        <!-- Analytics Section -->
+        <section id="analytics" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-2">
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Cash Flow Trajectory</h2>
+              <p class="text-xs text-slate-500 mb-4">Historical trend & 3-month forecast</p>
+              <div class="relative h-[280px] w-full">
+                <canvas id="flowChart"></canvas>
               </div>
             </div>
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Recent Snapshot</h2>
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Expenses by Category</h2>
+              <p class="text-xs text-slate-500 mb-4">Breakdown of operating expenditure</p>
+              <div class="relative h-[280px] w-full">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Health Score Section -->
+        <section id="health" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-[1fr_1.5fr]">
+            <div class="glass-card flex flex-col items-center justify-center rounded-3xl p-8 shadow-sm text-center">
+              <!-- Radial SVG Ring Meter -->
+              <div class="relative flex h-52 w-52 items-center justify-center">
+                <svg class="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" class="text-slate-200 dark:text-slate-800" fill="transparent"></circle>
+                  <circle id="scoreRing" cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" stroke-dasharray="263.89" stroke-dashoffset="50" stroke-linecap="round" class="text-emerald-500 gauge-circle" fill="transparent"></circle>
+                </svg>
+                <div class="absolute flex flex-col items-center justify-center">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Health Score</p>
+                  <p id="scoreValue" class="text-5xl font-extrabold text-emerald-600 dark:text-emerald-400 font-heading">85</p>
+                  <p class="text-[10px] text-slate-400">out of 100</p>
+                </div>
+              </div>
+              <div id="healthBadge" class="mt-4 rounded-full bg-emerald-100 px-4 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Optimal Health</div>
+              <p id="healthSummaryText" class="mt-3 text-sm text-slate-600 dark:text-slate-300">Healthy profit margin & controlled cash runway ratio.</p>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Health Evaluation Factors</h2>
+              <p class="text-xs text-slate-500 mb-4">Key parameters determining financial stability score</p>
+              <div id="healthFactors" class="space-y-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Invoices & Bills Section (NEW) -->
+        <section id="invoices" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-[1fr_1.3fr]">
+            <!-- Create Invoice Form -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Generate Client Invoice</h2>
+              <p class="text-xs text-slate-500 mb-4">Create & print GST compliant invoices</p>
+
+              <form id="invoiceForm" class="space-y-4">
+                <div>
+                  <label for="invClient" class="block text-xs font-medium uppercase text-slate-500 mb-1">Client Business Name</label>
+                  <input id="invClient" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. Apex Retail Private Ltd" />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label for="invNumber" class="block text-xs font-medium uppercase text-slate-500 mb-1">Invoice #</label>
+                    <input id="invNumber" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" value="INV-2026-004" />
+                  </div>
+                  <div>
+                    <label for="invDate" class="block text-xs font-medium uppercase text-slate-500 mb-1">Date</label>
+                    <input id="invDate" type="date" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                  </div>
+                </div>
+
+                <div>
+                  <label for="invItem" class="block text-xs font-medium uppercase text-slate-500 mb-1">Item / Service Description</label>
+                  <input id="invItem" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. Handicraft Supply Batch A" />
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label for="invQty" class="block text-xs font-medium uppercase text-slate-500 mb-1">Qty</label>
+                    <input id="invQty" type="number" value="10" min="1" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                  </div>
+                  <div>
+                    <label for="invRate" class="block text-xs font-medium uppercase text-slate-500 mb-1">Rate (₹)</label>
+                    <input id="invRate" type="number" value="2500" min="0" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                  </div>
+                  <div>
+                    <label for="invGstRate" class="block text-xs font-medium uppercase text-slate-500 mb-1">GST %</label>
+                    <select id="invGstRate" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800">
+                      <option value="0">0%</option>
+                      <option value="5">5%</option>
+                      <option value="12">12%</option>
+                      <option value="18" selected>18%</option>
+                      <option value="28">28%</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20">Generate Invoice</button>
+              </form>
+            </div>
+
+            <!-- Invoice Preview Card -->
+            <div id="invoicePreviewCard" class="glass-card rounded-3xl p-6 shadow-sm border border-emerald-100 dark:border-slate-800 print-area">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">TAX INVOICE</span>
+                  <h3 class="text-xl font-bold font-heading text-slate-900 dark:text-white">Coastal Crafts MSME</h3>
+                  <p class="text-xs text-slate-500">GSTIN: 29AAAAA0000A1Z5</p>
+                </div>
+                <div class="text-right">
+                  <p id="prevInvNum" class="text-sm font-bold text-slate-800 dark:text-slate-200">INV-2026-004</p>
+                  <p id="prevInvDate" class="text-xs text-slate-500">Date: 2026-08-06</p>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <p class="text-xs text-slate-400 font-semibold uppercase">Billed To:</p>
+                <p id="prevClient" class="text-base font-bold text-slate-800 dark:text-slate-200">Apex Retail Private Ltd</p>
+              </div>
+
+              <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+                  <thead class="bg-slate-100 dark:bg-slate-800 uppercase text-[10px]">
+                    <tr>
+                      <th class="p-2">Item Description</th>
+                      <th class="p-2 text-center">Qty</th>
+                      <th class="p-2 text-right">Rate</th>
+                      <th class="p-2 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-slate-100 dark:border-slate-800">
+                      <td id="prevItem" class="p-2 font-medium">Handicraft Supply Batch A</td>
+                      <td id="prevQty" class="p-2 text-center">10</td>
+                      <td id="prevRate" class="p-2 text-right">₹2,500</td>
+                      <td id="prevSubtotal" class="p-2 text-right">₹25,000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="mt-4 space-y-1.5 text-xs text-right text-slate-600 dark:text-slate-300">
+                <p>Subtotal: <span id="prevSub" class="font-medium text-slate-800 dark:text-slate-200">₹25,000</span></p>
+                <p>GST (<span id="prevGstPct">18</span>%): <span id="prevGstAmt" class="font-medium text-slate-800 dark:text-slate-200">₹4,500</span></p>
+                <div class="border-t border-slate-200 pt-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 dark:border-slate-700">
+                  Grand Total: <span id="prevGrandTotal">₹29,500</span>
+                </div>
+              </div>
+
+              <div class="mt-6 flex justify-end gap-2 no-print">
+                <button id="printInvoiceBtn" class="flex items-center gap-1.5 rounded-2xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 transition">
+                  <span>🖨️</span> Print Invoice
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Khata Ledger Section (NEW) -->
+        <section id="khata" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-[1fr_1.5fr]">
+            <!-- Add Party Form -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Record Party Balance (Khata)</h2>
+              <p class="text-xs text-slate-500 mb-4">Track customer credit & supplier debt</p>
+
+              <form id="partyForm" class="space-y-4">
+                <div>
+                  <label for="partyName" class="block text-xs font-medium uppercase text-slate-500 mb-1">Party / Business Name</label>
+                  <input id="partyName" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. Royal Artisans Shop" />
+                </div>
+
+                <div>
+                  <label for="partyType" class="block text-xs font-medium uppercase text-slate-500 mb-1">Entry Type</label>
+                  <select id="partyType" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800">
+                    <option value="receivable">You will Receive (Customer Credit)</option>
+                    <option value="payable">You will Pay (Vendor Payable)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="partyAmount" class="block text-xs font-medium uppercase text-slate-500 mb-1">Amount (₹)</label>
+                  <input id="partyAmount" type="number" required min="1" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="0.00" />
+                </div>
+
+                <div>
+                  <label for="partyDueDate" class="block text-xs font-medium uppercase text-slate-500 mb-1">Due Date</label>
+                  <input id="partyDueDate" type="date" required class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                </div>
+
+                <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20">Add to Ledger</button>
+              </form>
+            </div>
+
+            <!-- Khata Parties Summary & List -->
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="glass-card rounded-3xl p-5 border border-emerald-200/60 dark:border-emerald-900/40">
+                  <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total You Will Receive</p>
+                  <p id="totalReceivable" class="mt-2 text-2xl font-extrabold text-emerald-700 dark:text-emerald-400 font-heading">₹0</p>
+                </div>
+                <div class="glass-card rounded-3xl p-5 border border-rose-200/60 dark:border-rose-900/40">
+                  <p class="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Total You Will Pay</p>
+                  <p id="totalPayable" class="mt-2 text-2xl font-extrabold text-rose-600 dark:text-rose-400 font-heading">₹0</p>
+                </div>
+              </div>
+
+              <div class="glass-card rounded-3xl p-6 shadow-sm">
+                <h3 class="text-base font-bold font-heading mb-3">Party Ledger Entries</h3>
+                <div id="partiesList" class="space-y-3 max-h-[380px] overflow-y-auto pr-1"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- GST Estimator Section (NEW) -->
+        <section id="gst" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-[1fr_1.3fr]">
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">GST & Tax Estimator</h2>
+              <p class="text-xs text-slate-500 mb-4">Calculate CGST, SGST, IGST and quarterly tax reserves</p>
+
+              <div class="space-y-4">
+                <div>
+                  <label for="gstSales" class="block text-xs font-medium uppercase text-slate-500 mb-1">Total Taxable Sales (₹)</label>
+                  <input id="gstSales" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. 280000" />
+                </div>
+
+                <div>
+                  <label for="gstPurchases" class="block text-xs font-medium uppercase text-slate-500 mb-1">Total Input Tax Credit / Purchases (₹)</label>
+                  <input id="gstPurchases" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="e.g. 110000" />
+                </div>
+
+                <div>
+                  <label for="gstSlab" class="block text-xs font-medium uppercase text-slate-500 mb-1">Applicable GST Rate</label>
+                  <select id="gstSlab" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800">
+                    <option value="5">5% (Handicrafts, Goods)</option>
+                    <option value="12">12% (Apparel, Manufacturing)</option>
+                    <option value="18" selected>18% (Services, IT, Standard)</option>
+                    <option value="28">28% (Luxury Goods)</option>
+                  </select>
+                </div>
+
+                <button id="calcGstBtn" type="button" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20">Calculate GST Liability</button>
+              </div>
+            </div>
+
+            <!-- GST Output Result Card -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-emerald-100 dark:border-slate-800">
+              <h3 class="text-base font-bold font-heading text-slate-900 dark:text-white mb-4">Estimated Tax Breakdown</h3>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
+                  <p class="text-xs text-slate-500">Output GST (Sales)</p>
+                  <p id="gstOutputAmt" class="text-xl font-bold text-slate-900 dark:text-white font-heading">₹0</p>
+                </div>
+                <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
+                  <p class="text-xs text-slate-500">Input Tax Credit (ITC)</p>
+                  <p id="gstItcAmt" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-heading">₹0</p>
+                </div>
+              </div>
+
+              <div class="mt-4 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50/50 p-5 dark:border-emerald-900/50 dark:bg-emerald-950/40">
+                <p class="text-xs font-semibold uppercase text-emerald-800 dark:text-emerald-300">Net GST Payable</p>
+                <p id="gstNetPayable" class="mt-1 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-heading">₹0</p>
+                <div class="mt-3 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                  <p>CGST (50%): <span id="gstCgst" class="font-bold text-slate-800 dark:text-slate-200">₹0</span></p>
+                  <p>SGST (50%): <span id="gstSgst" class="font-bold text-slate-800 dark:text-slate-200">₹0</span></p>
+                </div>
+              </div>
+
+              <div class="mt-4 rounded-2xl bg-slate-50 p-4 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                <p class="font-bold text-slate-800 dark:text-slate-200">💡 Tax Optimization Tip:</p>
+                <p class="mt-1">Keep valid GSTIN vendor invoices to claim maximum Input Tax Credit and avoid late filing penalties.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="section hidden space-y-6">
+          <div class="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Export Financial Reports</h2>
+              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Generate instantly downloadable reports for tax compliance, bank loans, or stakeholder audits.</p>
+              
+              <div class="mt-6 flex flex-wrap gap-4">
+                <button id="pdfExport" class="flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 shadow-md">
+                  <span>📄</span> Download PDF Summary
+                </button>
+                <button id="excelExport" class="flex items-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-md shadow-emerald-600/20">
+                  <span>📊</span> Export CSV Ledger
+                </button>
+              </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading">Recent Financial Summary</h2>
               <div id="reportSummary" class="mt-4 space-y-3 text-sm"></div>
             </div>
           </div>
         </section>
 
-        <section id="settings" class="section hidden">
-          <div class="grid gap-6 xl:grid-cols-[1fr_1fr]">
-            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <h2 class="text-lg font-semibold">Preferences</h2>
-              <div class="mt-4 space-y-3">
-                <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
-                  <span>Enable notifications</span>
-                  <input id="notifToggle" type="checkbox" class="h-5 w-5 rounded border-slate-300" />
+        <!-- Settings Section -->
+        <section id="settings" class="section hidden space-y-6">
+          <div class="grid gap-6 lg:grid-cols-2">
+            <div class="glass-card rounded-3xl p-6 shadow-sm">
+              <h2 class="text-lg font-bold font-heading mb-4">System Preferences</h2>
+              <div class="space-y-3">
+                <label class="flex items-center justify-between rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+                  <span class="font-medium">System Notifications</span>
+                  <input id="notifToggle" type="checkbox" class="h-5 w-5 accent-emerald-600 rounded" />
                 </label>
-                <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
-                  <span>Voice assistant</span>
-                  <input id="voiceAssistToggle" type="checkbox" class="h-5 w-5 rounded border-slate-300" />
+                <label class="flex items-center justify-between rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+                  <span class="font-medium">Voice Assistant Speech Output</span>
+                  <input id="voiceAssistToggle" type="checkbox" class="h-5 w-5 accent-emerald-600 rounded" />
                 </label>
-                <label class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm dark:border-slate-700">
-                  <span>GST reminder</span>
-                  <input id="gstToggle" type="checkbox" class="h-5 w-5 rounded border-slate-300" />
+                <label class="flex items-center justify-between rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+                  <span class="font-medium">GST / Tax Deadlines Reminders</span>
+                  <input id="gstToggle" type="checkbox" class="h-5 w-5 accent-emerald-600 rounded" />
                 </label>
               </div>
-            </div>
-            <div class="space-y-4">
-              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h2 class="text-lg font-semibold">Goal Planner</h2>
-                <div class="mt-4 space-y-3">
-                  <input id="goalInput" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" value="50000" />
-                  <button id="saveGoalBtn" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white">Save goal</button>
-                  <div id="goalStatus" class="rounded-2xl border border-dashed border-emerald-200 p-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:text-emerald-400"></div>
+
+              <div class="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
+                <h3 class="text-sm font-bold mb-2">Data Management</h3>
+                <div class="flex gap-2">
+                  <button id="resetDemoBtn" class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400">Reset to Sample Data</button>
                 </div>
               </div>
-              <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h2 class="text-lg font-semibold">Budget Planner</h2>
+            </div>
+
+            <div class="space-y-6">
+              <div class="glass-card rounded-3xl p-6 shadow-sm">
+                <h2 class="text-lg font-bold font-heading">Goal Planner</h2>
+                <div class="mt-4 space-y-3">
+                  <div>
+                    <label for="goalInput" class="block text-xs font-medium uppercase text-slate-500 mb-1">Target Monthly Savings (₹)</label>
+                    <input id="goalInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" value="50000" />
+                  </div>
+                  <button id="saveGoalBtn" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 transition">Update Savings Goal</button>
+                  <div id="goalStatus" class="rounded-2xl border border-dashed border-emerald-300 p-3 text-xs text-emerald-700 dark:border-emerald-900/50 dark:text-emerald-400"></div>
+                </div>
+              </div>
+
+              <div class="glass-card rounded-3xl p-6 shadow-sm">
+                <h2 class="text-lg font-bold font-heading">Budget Targets</h2>
                 <form id="budgetForm" class="mt-4 space-y-3">
-                  <input id="budgetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Monthly Budget" />
-                  <input id="profitTargetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Target Profit" />
-                  <input id="savingsTargetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Savings Goal" />
-                  <button class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-medium text-white">Save plan</button>
+                  <input id="budgetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Monthly Expense Cap" />
+                  <input id="profitTargetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Target Net Profit" />
+                  <input id="savingsTargetInput" type="number" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Savings Goal Target" />
+                  <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 transition">Save Budget Plan</button>
                 </form>
-                <div id="budgetPlanSummary" class="mt-4 rounded-2xl border border-dashed border-emerald-200 p-3 text-sm text-emerald-700 dark:border-emerald-900/40 dark:text-emerald-400"></div>
+                <div id="budgetPlanSummary" class="mt-4 rounded-2xl border border-dashed border-slate-300 p-3 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-400"></div>
               </div>
             </div>
           </div>
@@ -248,28 +690,44 @@
       </main>
     </div>
 
-    <footer class="border-t border-slate-200 bg-white/80 px-6 py-6 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300">
-      <p class="font-semibold text-slate-800 dark:text-slate-100">Problem Statement:- Fin-04</p>
-      <p class="mt-2">Small businesses often struggle to understand their financial health because critical data is scattered across accounts, invoices, expenses, taxes, and records.<br> This platform brings it together into one clear decision-making dashboard.</p>
-      <p class="mt-4"><span class="font-semibold">Team Name:</span> Semicolon;)</p>
-      <p><span class="font-semibold">Team Members:</span> Aanya Jain (Team Lead) and Paridhi Gupta</p>
-    </footer>
-
-    <div id="assistantPanel" class="fixed bottom-5 right-5 z-50 hidden w-80 rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-      <div class="mb-3 flex items-center justify-between">
-        <div>
-          <p class="text-sm font-semibold">Finance Assistant</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400">AI suggestions</p>
+    <!-- AI Assistant Floating Overlay Drawer -->
+    <div id="assistantPanel" class="fixed bottom-5 right-5 z-50 hidden w-80 sm:w-96 rounded-3xl border border-slate-200/90 bg-white/95 p-5 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95 transition-all duration-300 animate-fade-in">
+      <div class="mb-3 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🤖</span>
+          <div>
+            <p class="text-sm font-bold font-heading">AI Finance Assistant</p>
+            <p class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Live Business Analytics</p>
+          </div>
         </div>
-        <button id="closeAssistant" class="text-sm text-slate-500">✕</button>
+        <button id="closeAssistant" class="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
       </div>
-      <div id="chatMessages" class="space-y-2 text-sm"></div>
+
+      <!-- Quick Prompt Chips -->
+      <div class="mb-2 flex flex-wrap gap-1.5 text-[11px]">
+        <button class="quick-chip rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300" data-prompt="Summarize cash flow">📊 Cash Summary</button>
+        <button class="quick-chip rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300" data-prompt="How to reduce expenses?">💡 Reduce Costs</button>
+        <button class="quick-chip rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300" data-prompt="Calculate GST liability">🧮 GST Help</button>
+      </div>
+
+      <div id="chatMessages" class="max-h-60 min-h-[160px] space-y-2 overflow-y-auto p-1 text-xs">
+        <div class="rounded-2xl bg-emerald-50 p-3 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+          Hello Asha! I am your AI Finance Assistant. Ask me anything about your revenue, cash flow runway, GST liability, or cost savings!
+        </div>
+      </div>
+
       <div class="mt-3 flex gap-2">
-        <input id="chatInput" class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none dark:border-slate-700 dark:bg-slate-800" placeholder="Ask about cash flow" />
-        <button id="sendChat" class="rounded-2xl bg-emerald-600 px-3 py-2 text-white">Send</button>
+        <input id="chatInput" class="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" placeholder="Ask a financial question..." />
+        <button id="sendChat" class="rounded-2xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20">Send</button>
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-slate-200 bg-white/80 px-6 py-6 text-center text-xs text-slate-500 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
+      <p class="font-bold text-slate-700 dark:text-slate-200">Fin-04 MSME Financial Health Platform</p>
+      <p class="mt-1">Empowering Small Businesses with consolidated accounts, invoices, tax reminders & real-time analytics.</p>
+      <p class="mt-3"><span class="font-semibold text-slate-600 dark:text-slate-300">Team Name:</span> Semicolon;) Aanaya Jain(Team Lead) Paridhi Gupta(Member)</p>
+    </footer>
+
   </body>
 </html>
